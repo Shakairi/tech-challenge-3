@@ -1,7 +1,6 @@
 import React from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Linking} from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 
 export default function WelcomeScreen() {
    const router = useRouter();
@@ -148,15 +147,15 @@ const styles = StyleSheet.create({
    },
 
    supportTitle: {
-      fontSize: 20,
+      fontSize: 19,
       fontWeight: 'bold',
       color: '#FFF',
-      marginBottom: 10,
+      marginBottom: 8,
       textAlign: 'center',
    },
 
    supportDesc: {
-      fontSize: 16,
+      fontSize: 13,
       color: '#DDD',
       textAlign: 'center',
       lineHeight: 22,

@@ -1,38 +1,91 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import React, { useState } from 'react'
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native'
+import { Link, useRouter } from 'expo-router'
+import { useAuth } from '@/context/AuthContext'
 
 export default function Login() {
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
-	const router = useRouter();
 
-	const handleLogin = () => {
-		// Lógica de autenticação (ex: Firebase ou API)
-		console.log("Logando com:", email);
-		router.replace('/(tabs)'); // Redireciona para a home após login
-	};
+	const [email, setEmail] = useState('')
+	const [password, setPassword] = useState('')
+	const [loading, setLoading] = useState(false)
+
+	const router = useRouter()
+	const { login } = useAuth()
+
+	const handleLogin = async () => {
+
+		if (!email.trim() || !password.trim()) {
+			Alert.alert("Erro", "Preencha email e senha")
+			return
+		}
+
+		const emailRegex = /\S+@\S+\.\S+/
+
+		if (!emailRegex.test(email)) {
+			Alert.alert("Erro", "Digite um email válido")
+			return
+		}
+
+		try {
+
+			setLoading(true)
+
+			await login(email.trim(), password)
+
+			router.replace("/dashboard")
+
+		} catch (error: any) {
+
+			let message = "Erro ao fazer login"
+
+			switch (error.code) {
+
+				case "auth/user-not-found":
+					message = "Usuário não encontrado"
+					break
+
+				case "auth/wrong-password":
+					message = "Senha incorreta"
+					break
+
+				case "auth/invalid-credential":
+					message = "Email ou senha inválidos"
+					break
+
+				case "auth/invalid-email":
+					message = "Email inválido"
+					break
+
+			}
+
+			Alert.alert("Erro", message)
+
+		} finally {
+
+			setLoading(false)
+
+		}
+
+	}
 
 	return (
 		<KeyboardAvoidingView
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 			style={styles.container}
 		>
+
 			<View style={styles.innerContainer}>
 
-				<View style={{ alignItems: 'center', marginBottom: 30 }}	>
-					<Image
-						source={require('@/assets/images/logo.png')}
-						style={styles.logoImage}
-					/>
-				</View>
+				<Image
+					source={require('@/assets/images/logo.png')}
+					style={styles.logoImage}
+				/>
 
-				<Text style={styles.title}>Bem-vindo de volta :)</Text>
+				<Text style={styles.title}>Bem-vindo</Text>
 
 				<TextInput
 					style={styles.input}
-					placeholder="E-mail"
-					keyboardType="email-address"
+					placeholder="Email"
 					autoCapitalize="none"
 					value={email}
 					onChangeText={setEmail}
@@ -46,84 +99,90 @@ export default function Login() {
 					onChangeText={setPassword}
 				/>
 
-				<TouchableOpacity style={styles.button} onPress={handleLogin}>
-					<Text style={styles.buttonText}>Entrar</Text>
+				<TouchableOpacity
+					style={styles.button}
+					onPress={handleLogin}
+					disabled={loading}
+				>
+
+					<Text style={styles.buttonText}>
+						{loading ? "Entrando..." : "Entrar"}
+					</Text>
+
 				</TouchableOpacity>
 
 				<Link href="/signup" asChild>
 					<TouchableOpacity style={styles.link}>
-						<Text style={styles.linkText}>Não tem uma conta? <Text style={styles.bold}>Cadastre-se</Text></Text>
+						<Text>
+							Não tem conta? <Text style={styles.bold}>Cadastre-se</Text>
+						</Text>
 					</TouchableOpacity>
 				</Link>
+
 			</View>
+
 		</KeyboardAvoidingView>
-	);
+	)
 }
 
-// Estilos compartilhados 
 const styles = StyleSheet.create({
-
-	container: {
-		flex: 1,
-		backgroundColor: '#f5f5f5'
+	
+	container: { 
+		flex: 1, 
+		backgroundColor: '#f5f5f5' 
 	},
-
-	innerContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		padding: 25
+	
+	innerContainer: { 
+		flex: 1, 
+		justifyContent: 'center', 
+		padding: 25 
 	},
-
-	logoImage: {
-		width: 250,
-		resizeMode: 'contain'
+	
+	logoImage: { 
+		width: 250, 
+		resizeMode: 'contain', 
+		alignSelf: 'center', 
+		marginBottom: 30 
 	},
-
-	title: {
-		fontSize: 25,
-		fontWeight: 'bold',
-		marginBottom: 30,
-		color: '#246419',
-		textAlign: 'center'
+	
+	title: { 
+		color: '#1e9038',
+		fontSize: 25, 
+		fontWeight: 'bold', 
+		textAlign: 'center', 
+		marginBottom: 30 
 	},
-
-	input: {
+	
+	input: { 
 		backgroundColor: '#fff',
-		padding: 15,
-		borderRadius: 10,
-		marginBottom: 15,
-		borderWidth: 1,
-		borderColor: '#ddd',
-		fontSize: 16
+		borderColor: '#CCC',
+		borderWidth: 1, 
+		padding: 15, 
+		borderRadius: 10, 
+		marginBottom: 15 
 	},
-
-	button: {
-		backgroundColor: '#28a745',
-		padding: 18,
-		borderRadius: 10,
-		alignItems: 'center',
-		marginTop: 10
+	
+	button: { 
+		backgroundColor: '#28a745', 
+		padding: 18, 
+		borderRadius: 10, 
+		alignItems: 'center' 
 	},
-
-	buttonText: {
-		color: '#fff',
-		fontSize: 18,
-		fontWeight: 'bold'
+	
+	buttonText: { 
+		color: '#fff', 
+		fontWeight: 'bold', 
+		fontSize: 18 
 	},
-
-	link: {
-		marginTop: 20,
-		alignItems: 'center'
+	
+	link: { 
+		marginTop: 20, 
+		alignItems: 'center' 
 	},
-
-	linkText: {
-		color: '#666',
-		fontSize: 14
-	},
-
-	bold: {
-		color: '#28a745',
-		fontWeight: 'bold'
+	
+	bold: { 
+		color: '#28a745', 
+		fontWeight: 'bold' 
 	}
 
-});
+})
