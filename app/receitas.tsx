@@ -2,21 +2,28 @@ import { useAuth } from "@/context/AuthContext";
 import { useTransactions } from "@/context/TransactionsContext";
 import { useRouter } from "expo-router";
 import React from "react";
+import Chart from "@/components/Chart";
+import { mockData } from "@/utils/data";
+
 import {
-	Alert,
-	SafeAreaView,
-	ScrollView,
-	StatusBar,
-	StyleSheet,
-	Text,
-	TouchableOpacity,  
-	View,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
 
-export default function Dashboard() {
+export default function Receitas () {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { summary } = useTransactions();
+  
+  const chartData = mockData["12M"]
+  const { width } = useWindowDimensions(); 
 
   const handleLogout = async () => {
     Alert.alert("Sair", "Tem certeza que deseja sair?", [
@@ -36,18 +43,12 @@ export default function Dashboard() {
     ]);
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        
         <View style={styles.header}>
           <Text style={styles.greeting}>
             Bem-vindo, {user?.name || "Usuário"}!
@@ -55,43 +56,12 @@ export default function Dashboard() {
           <Text style={styles.subtitle}>{user?.email}</Text>
         </View>
 
-        <View style={styles.summaryContainer}>
-          <View style={[styles.summaryCard, styles.balanceCard]}>
-            <Text style={styles.cardLabel}>Saldo</Text>
-            <Text style={styles.cardValue}>
-              {formatCurrency(summary?.balance || 0)}
-            </Text>
-          </View>
-
-          <View style={styles.summaryRow}>
-            <View style={[styles.summaryCard, styles.incomeCard]}>
-              <Text style={styles.cardLabel}>Receita</Text>
-              <Text style={styles.cardValue}>
-                {formatCurrency(summary?.totalIncome || 0)}
-              </Text>
-              <TouchableOpacity
-                style={styles.cardLink}
-                onPress={() => router.push("/receitas")}
-              >
-                <Text style={styles.buttonText}>Gráfico de Receitas</Text>
-              </TouchableOpacity>              
-            </View>
-
-            <View style={[styles.summaryCard, styles.expenseCard]}>
-              <Text style={styles.cardLabel}>Despesa</Text>
-              <Text style={styles.cardValue}>
-                {formatCurrency(summary?.totalExpense || 0)}
-              </Text>              
-              <TouchableOpacity
-                style={styles.cardLink}
-                onPress={() => router.push("/despesas")}
-              >
-                <Text style={styles.buttonText}>Gráfico de Despesas</Text>
-              </TouchableOpacity>              
-            </View>
-          </View>
+        <View style={styles.chartContainer}>
+          <Text style={styles.smalltitle}>Gráfico de Receitas</Text>
+          <Text style={styles.maintitle}>R$ 0,00</Text>
+          <Chart data={chartData} width={width} />
         </View>
-
+        
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.primaryButton}
@@ -99,6 +69,7 @@ export default function Dashboard() {
           >
             <Text style={styles.buttonText}>📊 Ver Transações</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={handleLogout}
@@ -106,6 +77,7 @@ export default function Dashboard() {
             <Text style={styles.secondaryButtonText}>🚪 Sair</Text>
           </TouchableOpacity>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -139,54 +111,22 @@ const styles = StyleSheet.create({
     color: "#666",
   },
 
-  summaryContainer: {
-    marginBottom: 32,
+  smalltitle: {
+    fontSize: 16,
+    color: "#666",
   },
 
-  summaryCard: {
-    borderRadius: 12,
-    padding: 20,
+  maintitle: {
+    fontSize: 46,
+    color: "#1e9038",
+    marginBottom: 30,
+    fontWeight: "bold"
+  },
+  
+  chartContainer: {
+    flex: 1,
+    alignContent: "center",
     justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginBottom: 12,
-  },
-
-  balanceCard: {
-    backgroundColor: "#1e9038",
-  },
-
-  incomeCard: {
-    backgroundColor: "#4CAF50",
-    flex: 1,
-    marginRight: 8,
-  },
-
-  expenseCard: {
-    backgroundColor: "#F44336",
-    flex: 1,
-    marginLeft: 8,
-  },
-
-  summaryRow: {
-    flexDirection: "row",
-  },
-
-  cardLabel: {
-    fontSize: 18,
-    color: "#fff",
-    opacity: 0.9,
-    marginBottom: 8,
-  },
-
-  cardValue: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
   },
 
   actionsContainer: {
@@ -210,8 +150,8 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: "#fff",
-    fontSize: 15,
-    fontWeight: "300",
+    fontSize: 16,
+    fontWeight: "600",
   },
 
   secondaryButton: {
@@ -233,19 +173,6 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: "#333",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "bold"
   },
-
-  cardLink: {
-    marginTop: 20,    
-    backgroundColor: 'transparent',
-    height: 40,
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFF',
-    width: '100%'
-  }
-  
 });
