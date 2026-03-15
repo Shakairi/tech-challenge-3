@@ -1,11 +1,11 @@
 import { storageService, transactionsService } from "@/firebase/transactions";
 import { Transaction, TransactionFilter, TransactionSummary } from "@/types";
 import {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { useAuth } from "./AuthContext";
 
@@ -17,7 +17,6 @@ interface ITransactionsContext {
   filter: TransactionFilter;
   setFilter: (filter: TransactionFilter) => void;
 
-  // Operações
   addTransaction: (
     transaction: Omit<Transaction, "id" | "createdAt" | "updatedAt">,
   ) => Promise<Transaction>;
@@ -34,11 +33,9 @@ interface ITransactionsContext {
   }) => Promise<string>;
   deleteReceipt: (filePath: string) => Promise<void>;
 
-  // Paginação
   loadMore: () => Promise<void>;
   hasMore: boolean;
 
-  // Sincronização
   refreshTransactions: () => Promise<void>;
 }
 
@@ -60,14 +57,12 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [hasMore, setHasMore] = useState(true);
   const [lastDoc, setLastDoc] = useState<any>(null);
 
-  // Carrega transações quando usuário faz login ou filtro muda
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       refreshTransactions();
     }
   }, [isAuthenticated, user?.email]);
 
-  // Calcula summary
   useEffect(() => {
     if (transactions.length > 0) {
       const totalIncome = transactions
@@ -153,7 +148,6 @@ export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
         user.id,
         transaction,
       );
-      // Adiciona no topo da lista
       setTransactions((prev) => [newTransaction, ...prev]);
       return newTransaction;
     } catch (err: any) {
