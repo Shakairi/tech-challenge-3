@@ -1,188 +1,192 @@
-import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native'
-import { Link, useRouter } from 'expo-router'
-import { useAuth } from '@/context/AuthContext'
+import ErrorModal from "@/components/ErrorModal";
+import { useAuth } from "@/context/AuthContext";
+import { Link, useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showError, setShowError] = useState(false);
 
-	const [email, setEmail] = useState('')
-	const [password, setPassword] = useState('')
-	const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const { login } = useAuth();
 
-	const router = useRouter()
-	const { login } = useAuth()
+  const showErrorModal = (message: string) => {
+    setErrorMessage(message);
+    setShowError(true);
+  };
 
-	const handleLogin = async () => {
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      showErrorModal("Preencha email e senha");
+      return;
+    }
 
-		if (!email.trim() || !password.trim()) {
-			Alert.alert("Erro", "Preencha email e senha")
-			return
-		}
+    const emailRegex = /\S+@\S+\.\S+/;
 
-		const emailRegex = /\S+@\S+\.\S+/
+    if (!emailRegex.test(email)) {
+      showErrorModal("Digite um email válido");
+      return;
+    }
 
-		if (!emailRegex.test(email)) {
-			Alert.alert("Erro", "Digite um email válido")
-			return
-		}
+    try {
+      setLoading(true);
 
-		try {
+      await login(email.trim(), password);
 
-			setLoading(true)
+      router.replace("/dashboard");
+    } catch (error: any) {
+      let message = "Erro ao fazer login";
 
-			await login(email.trim(), password)
+      switch (error.code) {
+        case "auth/user-not-found":
+          message = "Usuário não encontrado";
+          break;
 
-			router.replace("/dashboard")
+        case "auth/wrong-password":
+          message = "Senha incorreta";
+          break;
 
-		} catch (error: any) {
+        case "auth/invalid-credential":
+          message = "Email ou senha inválidos";
+          break;
 
-			let message = "Erro ao fazer login"
+        case "auth/invalid-email":
+          message = "Email inválido";
+          break;
+      }
 
-			switch (error.code) {
+      showErrorModal(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-				case "auth/user-not-found":
-					message = "Usuário não encontrado"
-					break
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <View style={styles.innerContainer}>
+        <Image
+          source={require("@/assets/images/logo.png")}
+          style={styles.logoImage}
+        />
 
-				case "auth/wrong-password":
-					message = "Senha incorreta"
-					break
+        <Text style={styles.title}>Bem-vindo</Text>
 
-				case "auth/invalid-credential":
-					message = "Email ou senha inválidos"
-					break
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
 
-				case "auth/invalid-email":
-					message = "Email inválido"
-					break
+        <TextInput
+          style={styles.input}
+          placeholder="Senha"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-			}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Entrando..." : "Entrar"}
+          </Text>
+        </TouchableOpacity>
 
-			Alert.alert("Erro", message)
+        <Link href="/signup" asChild>
+          <TouchableOpacity style={styles.link}>
+            <Text>
+              Não tem conta? <Text style={styles.bold}>Cadastre-se</Text>
+            </Text>
+          </TouchableOpacity>
+        </Link>
+      </View>
 
-		} finally {
-
-			setLoading(false)
-
-		}
-
-	}
-
-	return (
-		<KeyboardAvoidingView
-			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-			style={styles.container}
-		>
-
-			<View style={styles.innerContainer}>
-
-				<Image
-					source={require('@/assets/images/logo.png')}
-					style={styles.logoImage}
-				/>
-
-				<Text style={styles.title}>Bem-vindo</Text>
-
-				<TextInput
-					style={styles.input}
-					placeholder="Email"
-					autoCapitalize="none"
-					value={email}
-					onChangeText={setEmail}
-				/>
-
-				<TextInput
-					style={styles.input}
-					placeholder="Senha"
-					secureTextEntry
-					value={password}
-					onChangeText={setPassword}
-				/>
-
-				<TouchableOpacity
-					style={styles.button}
-					onPress={handleLogin}
-					disabled={loading}
-				>
-
-					<Text style={styles.buttonText}>
-						{loading ? "Entrando..." : "Entrar"}
-					</Text>
-
-				</TouchableOpacity>
-
-				<Link href="/signup" asChild>
-					<TouchableOpacity style={styles.link}>
-						<Text>
-							Não tem conta? <Text style={styles.bold}>Cadastre-se</Text>
-						</Text>
-					</TouchableOpacity>
-				</Link>
-
-			</View>
-
-		</KeyboardAvoidingView>
-	)
+      <ErrorModal
+        visible={showError}
+        message={errorMessage}
+        onClose={() => setShowError(false)}
+      />
+    </KeyboardAvoidingView>
+  );
 }
 
 const styles = StyleSheet.create({
-	
-	container: { 
-		flex: 1, 
-		backgroundColor: '#f5f5f5' 
-	},
-	
-	innerContainer: { 
-		flex: 1, 
-		justifyContent: 'center', 
-		padding: 25 
-	},
-	
-	logoImage: { 
-		width: 250, 
-		resizeMode: 'contain', 
-		alignSelf: 'center', 
-		marginBottom: 30 
-	},
-	
-	title: { 
-		color: '#1e9038',
-		fontSize: 25, 
-		fontWeight: 'bold', 
-		textAlign: 'center', 
-		marginBottom: 30 
-	},
-	
-	input: { 
-		backgroundColor: '#fff',
-		borderColor: '#CCC',
-		borderWidth: 1, 
-		padding: 15, 
-		borderRadius: 10, 
-		marginBottom: 15 
-	},
-	
-	button: { 
-		backgroundColor: '#28a745', 
-		padding: 18, 
-		borderRadius: 10, 
-		alignItems: 'center' 
-	},
-	
-	buttonText: { 
-		color: '#fff', 
-		fontWeight: 'bold', 
-		fontSize: 18 
-	},
-	
-	link: { 
-		marginTop: 20, 
-		alignItems: 'center' 
-	},
-	
-	bold: { 
-		color: '#28a745', 
-		fontWeight: 'bold' 
-	}
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
 
-})
+  innerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 25,
+  },
+
+  logoImage: {
+    width: 250,
+    resizeMode: "contain",
+    alignSelf: "center",
+    marginBottom: 30,
+  },
+
+  title: {
+    color: "#1e9038",
+    fontSize: 25,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+
+  input: {
+    backgroundColor: "#fff",
+    borderColor: "#CCC",
+    borderWidth: 1,
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+
+  button: {
+    backgroundColor: "#28a745",
+    padding: 18,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+
+  link: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+
+  bold: {
+    color: "#28a745",
+    fontWeight: "bold",
+  },
+});
