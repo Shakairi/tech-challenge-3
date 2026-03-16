@@ -2,6 +2,7 @@ import ErrorModal from "@/components/ErrorModal";
 import { useAuth } from "@/context/AuthContext";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
+
 import {
     Image,
     KeyboardAvoidingView,

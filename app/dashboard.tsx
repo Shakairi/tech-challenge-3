@@ -73,7 +73,7 @@ export default function Dashboard() {
                 style={styles.cardLink}
                 onPress={() => router.push("/receitas")}
               >
-                <Text style={styles.buttonText}>Gráfico de Receitas</Text>
+                <Text style={styles.buttonTextOutline}>Gráfico de Receitas</Text>
               </TouchableOpacity>              
             </View>
 
@@ -86,7 +86,7 @@ export default function Dashboard() {
                 style={styles.cardLink}
                 onPress={() => router.push("/despesas")}
               >
-                <Text style={styles.buttonText}>Gráfico de Despesas</Text>
+                <Text style={styles.buttonTextOutline}>Gráfico de Despesas</Text>
               </TouchableOpacity>              
             </View>
           </View>
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
 
   summaryCard: {
     borderRadius: 12,
-    padding: 20,
+    padding: 15,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -177,14 +177,14 @@ const styles = StyleSheet.create({
   },
 
   cardLabel: {
-    fontSize: 18,
+    fontSize: 14,
     color: "#fff",
     opacity: 0.9,
     marginBottom: 8,
   },
 
   cardValue: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
   },
@@ -210,8 +210,15 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  buttonTextOutline: {
+    color: "#fff",
+    fontSize: 12,
     fontWeight: "300",
+    textAlign: "center"
   },
 
   secondaryButton: {
@@ -239,11 +246,11 @@ const styles = StyleSheet.create({
   cardLink: {
     marginTop: 20,    
     backgroundColor: 'transparent',
-    height: 40,
+    height: 32,
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#FFF',
     width: '100%'
   }
